@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Author = require('../models/author')
 const Book = require('../models/book')
+// const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 
 // All Authors Route
 router.get('/', async (req, res) => {

@@ -7,7 +7,10 @@
       <li><a href="/books">Books</a></li>
       <li><a href="/books/new">Add Book</a></li>
       <li>
-        <form action="/logout?_method=DELETE" method="post">
+        <!-- <form action="/logout?_method=DELETE" method="post">
+          <button type="submit" class="btn btn-warning btn-sm">Logout</button>
+        </form> -->
+        <form action="/auth/logout" method="get">
           <button type="submit" class="btn btn-warning btn-sm">Logout</button>
         </form>
       </li>

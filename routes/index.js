@@ -1,8 +1,9 @@
 const express = require('express')
 const router = express.Router()
 const Book = require('../models/book')
+const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 
-router.get('/', async (req, res) => {
+router.get('/', ensureAuthenticated, async (req, res) => {
   let books
   try {
     books = await Book.find().sort({ createdAt: 'desc' }).limit(10).exec()

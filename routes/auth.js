@@ -1,10 +1,13 @@
 const router = require("express").Router();
 const User = require("../models/user");
 const Author = require("../models/author");
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
+const passport = require('passport');
+const { forwardAuthenticated } = require('../config/auth');
 
 //view registration page
-router.get("/register", async (req, res) => {
+router.get("/register", forwardAuthenticated, async (req, res) => {
     res.render('auth/register', {layout: "layouts/layout2"})
 })
 
@@ -65,34 +68,65 @@ router.post("/register", async (req, res) => {
 });
 
 // view login page
-router.get("/login", async (req, res) => {
+router.get("/login", forwardAuthenticated, async (req, res) => {
     res.render('auth/login', {layout: "layouts/layout2"})
 })
 
 
 // LOGIN
-router.post("/login", async (req, res) => {
-    // try {
-    //     const user = await User.findOne({username: req.body.username});
-    //     if(!user) {
-    //         res.status(400).json("Wrong credentials, try again");
-    //     }
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', {
+      successRedirect: '/',
+      failureRedirect: '/auth/login',
+      failureFlash: true
+    })(req, res, next);
+  });
 
-    //     const validated = await bcrypt.compare(req.body.password, user.password);
-    //     if(!validated) { // passwords don't match
-    //         res.status(400).json("Wrong credentials, try again");
-    //     }
+// router.post("/login", (req, res) => {
+//     try {
+//         // const user = await User.findOne({username: req.body.username});
+//         // if(!user) {
+//         //     res.status(400).json("Wrong credentials, try again");
+//         // }
+
+//         // const validated = await bcrypt.compare(req.body.password, user.password);
+//         // if(!validated) { // passwords don't match
+//         //     res.status(400).json("Wrong credentials, try again");
+//         // }
         
-    //     // take everything in variable others except password.
-    //     const { password, ...others } = user._doc;
-    //     // res.status(200).json(others);
-    //     // res.status(200).redirect('index'); // only after authentication successful
+//         // // take everything in variable others except password.
+//         // const { password, ...others } = user._doc;
+//         // res.status(200).json(others);
+//         // res.status(200).redirect('index'); // only after authentication successful
+//         res.redirect('/');
+//     } catch (err) {
+//         // res.status(500).json(err);
+//         res.redirect('/');
+//     }
+// });
 
-    // } catch (err) {
-    //     // res.status(500).json(err);
-    //     res.status(500).redirect('/auth/login');
-    // }
+//logout
+router.get('/logout', (req, res) => {
+    // req.logout();
+    // req.flash('success_msg', 'You are logged out');
+    // res.redirect('/auth/login');
+    req.logOut((err)=>{
+    if(err){
+      return next(err)
+    }
+    req.flash('success_msg', 'You are logged out');
+    res.redirect('/auth/login')
+  })
 });
+
+// app.delete('/logout', (req, res) => {
+//   req.logOut((err)=>{
+//     if(err){
+//       return next(err)
+//     }
+//     res.redirect('/login')
+//   })
+// })
 
 module.exports = router
 
