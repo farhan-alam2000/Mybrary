@@ -1,3 +1,4 @@
+// const authApp = require("../server")
 const router = require("express").Router();
 const User = require("../models/user");
 const Author = require("../models/author");
@@ -5,11 +6,11 @@ const Author = require("../models/author");
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const { forwardAuthenticated } = require('../config/auth');
-
 //view registration page
 router.get("/register", forwardAuthenticated, async (req, res) => {
     res.render('auth/register', {layout: "layouts/layout2"})
 })
+
 
 // REGISTER a new user
 router.post("/register", async (req, res) => {
@@ -72,15 +73,19 @@ router.get("/login", forwardAuthenticated, async (req, res) => {
     res.render('auth/login', {layout: "layouts/layout2"})
 })
 
+// console.log(app.locals.port)
 
 // LOGIN
 router.post('/login', (req, res, next) => {
+    // console.log(req.body.email);
+    global.email = req.body.email
+    console.log(global.email)
     passport.authenticate('local', {
       successRedirect: '/',
       failureRedirect: '/auth/login',
       failureFlash: true
     })(req, res, next);
-  });
+});
 
 // router.post("/login", (req, res) => {
 //     try {
@@ -129,6 +134,9 @@ router.get('/logout', (req, res) => {
 // })
 
 module.exports = router
+
+
+
 
 
 

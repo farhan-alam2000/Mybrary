@@ -8,7 +8,11 @@ const { spawn, spawnSync } = require("child_process");
 
 // All Books Route and Search Route
 router.get("/", async (req, res) => {
-  let query = Book.find();
+  const email = global.email
+  
+  let query = Book.find({email});
+  // console.log(query)
+  // console.log(query.schema.obj.email)
   if (req.query.title != null && req.query.title != "") {
     query = query.regex("title", new RegExp(req.query.title, "i"));
   }
@@ -18,13 +22,16 @@ router.get("/", async (req, res) => {
   if (req.query.publishedAfter != null && req.query.publishedAfter != "") {
     query = query.gte("publishDate", req.query.publishedAfter);
   }
+
   try {
+    // console.log(email)
     const books = await query.exec();
+    // console.log(books)
     res.render("books/index", {
       books: books,
       searchOptions: req.query,
     });
-
+    
     if (req.query.title != null && req.query.title != "") {
       // const keyword = req.query.title; //case sensitive?
       const keyword = "India"; //case sensitive?
@@ -61,6 +68,7 @@ router.post("/", async (req, res) => {
     publishDate: new Date(req.body.publishDate),
     pageCount: req.body.pageCount,
     description: req.body.description,
+    email: global.email
   });
   saveCover(book, req.body.cover);
   // create index table from description
@@ -72,6 +80,7 @@ router.post("/", async (req, res) => {
 
     // const dataToScript =
     //   "India, officially the Republic of India, is a country in South Asia. It is the seventh largest country by area, the second most populous country, and the most populous democracy in the world. Bounded by the Indian Ocean on the south, the Arabian Sea on the southwest, and the Bay of Bengal on the southeast, it shares land borders with Pakistan to the west; China, Nepal, and Bhutan to the north; and Bangladesh and Myanmar to the east. In the Indian Ocean, India is in the vicinity of Sri Lanka and the Maldives; its Andaman and Nicobar Islands share a maritime border with Thailand, Myanmar, and Indonesia. The nation's capital city is New Delhi.";
+    /*
     const indexing = spawnSync("python", [
       "C:/Users/alaam/OneDrive/Desktop/mybrary/Mybrary/public/pythonScripts/indexing.py",
       dataToScript,
@@ -85,9 +94,10 @@ router.post("/", async (req, res) => {
     // console.log(encrypt.error);
     // dataToSend += encrypt.output.toString("utf-8");
     console.log(encrypt.output.toString('utf-8'))
-
+    */
     // store yes_index.csv
-  } catch {
+  } catch(err) {
+    console.log(err)
     renderNewPage(res, book, true);
   }
 });

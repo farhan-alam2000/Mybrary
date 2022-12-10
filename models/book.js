@@ -1,12 +1,17 @@
 const mongoose = require('mongoose')
 
 const bookSchema = new mongoose.Schema({
+  email: {
+    type: String, 
+    required: true
+  },
   title: {
     type: String,
     required: true
   },
   description: {
-    type: String
+    type: String,
+    required: true
   },
   publishDate: {
     type: Date,
@@ -23,11 +28,11 @@ const bookSchema = new mongoose.Schema({
   },
   coverImage: {
     type: Buffer,
-    required: false
+    required: true
   },
   coverImageType: {
     type: String,
-    required: false
+    required: true
   },
   author: {
     type: mongoose.Schema.Types.ObjectId,
