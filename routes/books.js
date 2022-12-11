@@ -5,6 +5,7 @@ const Author = require("../models/author");
 // const { ensureAuthenticated, forwardAuthenticated } = require('../config/auth');
 const imageMimeTypes = ["image/jpeg", "image/png", "images/gif"];
 const { spawn, spawnSync } = require("child_process");
+const User = require("../models/user")
 
 // All Books Route and Search Route
 router.get("/", async (req, res) => {
@@ -62,43 +63,64 @@ router.get("/new", async (req, res) => {
 
 // Create Book Route
 router.post("/", async (req, res) => {
-  const book = new Book({
-    title: req.body.title,
-    author: req.body.author,
-    publishDate: new Date(req.body.publishDate),
-    pageCount: req.body.pageCount,
-    description: req.body.description,
-    email: global.email
-  });
-  saveCover(book, req.body.cover);
-  // create index table from description
-
   try {
-    const newBook = await book.save();
-    res.redirect(`books/${newBook.id}`);
-    const dataToScript = req.body.description; //we can send title also to script
+    // const newBook = await book.save();
+    // res.redirect(`books/${newBook.id}`);
+    const data = req.body.description; //we can send title also to script
+    // do this update route 
+    // const data = "America, officially the Republic of India, is a country in South Asia." 
+    // const email = global.email
+    const email = "farhan@gmail.com"
+    const user = await User.find({email})
+    // console.log(user[0].password)
+    const password = user[0].password.slice(0,16)
+  
+  //CLEAN THE TEXT
+  const preprocess = spawnSync("python", ["C:/Users/alaam/OneDrive/Desktop/mybrary/Mybrary/public/pythonScripts/preprocess.py", data]);
+  const cleaned_doc = preprocess.output.toString('utf8');
+    console.log(cleaned_doc)
+  //Encrypt the Text
+  const encryptingDoc = spawnSync("python", ["C:/Users/alaam/OneDrive/Desktop/mybrary/Mybrary/public/pythonScripts/encrypt_text.py", cleaned_doc, password]);
+  const encr_text = encryptingDoc.output.toString('utf8');
+  console.log(encr_text)
+  
+  const newBook = new Book({
+    email: email,
+    title: req.body.title,
+    description: encr_text,
+  });
+  saveCover(newBook, req.body.cover);
+  //Saving the Encrypted Text
+  newBook
+    .save()
+    .then((savedText) => {
+      const id = savedText._id.toString(); 
+      console.log("encrypted text is saved!", "id is ", id)
 
-    // const dataToScript =
-    //   "India, officially the Republic of India, is a country in South Asia. It is the seventh largest country by area, the second most populous country, and the most populous democracy in the world. Bounded by the Indian Ocean on the south, the Arabian Sea on the southwest, and the Bay of Bengal on the southeast, it shares land borders with Pakistan to the west; China, Nepal, and Bhutan to the north; and Bangladesh and Myanmar to the east. In the Indian Ocean, India is in the vicinity of Sri Lanka and the Maldives; its Andaman and Nicobar Islands share a maritime border with Thailand, Myanmar, and Indonesia. The nation's capital city is New Delhi.";
-    /*
-    const indexing = spawnSync("python", [
-      "C:/Users/alaam/OneDrive/Desktop/mybrary/Mybrary/public/pythonScripts/indexing.py",
-      dataToScript,
-    ]);
-    // dataToSend = indexing.output.toString("utf8") + "\n";
-    console.log(indexing.output.toString('utf8') + "\nIndexing script over!");
-    const encrypt = spawnSync("python", [
-      "C:/Users/alaam/OneDrive/Desktop/mybrary/Mybrary/public/pythonScripts/encrypt_index.py",
-      dataToScript,
-    ]);
-    // console.log(encrypt.error);
-    // dataToSend += encrypt.output.toString("utf-8");
-    console.log(encrypt.output.toString('utf-8'))
-    */
-    // store yes_index.csv
+      //Creating the Index Table
+      const indexing = spawnSync("python", [
+        "C:/Users/alaam/OneDrive/Desktop/mybrary/Mybrary/public/pythonScripts/indexing.py",
+        cleaned_doc, id
+      ]);
+      const idx_table = indexing.output.toString('utf8');
+      // console.log(idx_table)
+      //Encrypting the Index Table
+      const encrypt = spawnSync("python", [
+        "C:/Users/alaam/OneDrive/Desktop/mybrary/Mybrary/public/pythonScripts/encrypt_index.py", idx_table, password
+      ]);
+      const encr_idx = encrypt.output.toString('utf8')
+      console.log(encr_idx)
+      //Saving the Encrypted Table
+      User.findOneAndUpdate({email: email}, {index:encr_idx}, {new:true})
+      .catch(err => console.log(err))
+
+      res.redirect(`books/${id}`);
+    })
+    .catch((err) => console.log(err));
+    
   } catch(err) {
     console.log(err)
-    renderNewPage(res, book, true);
+    renderNewPage(res, newBook, true);
   }
 });
 
@@ -129,9 +151,9 @@ router.put("/:id", async (req, res) => {
   try {
     book = await Book.findById(req.params.id);
     book.title = req.body.title;
-    book.author = req.body.author;
-    book.publishDate = new Date(req.body.publishDate);
-    book.pageCount = req.body.pageCount;
+    // book.author = req.body.author;
+    // book.publishDate = new Date(req.body.publishDate);
+    // book.pageCount = req.body.pageCount;
     book.description = req.body.description;
     if (req.body.cover != null && req.body.cover !== "") {
       saveCover(book, req.body.cover);

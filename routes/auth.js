@@ -6,11 +6,11 @@ const Author = require("../models/author");
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 const { forwardAuthenticated } = require('../config/auth');
+
 //view registration page
 router.get("/register", forwardAuthenticated, async (req, res) => {
     res.render('auth/register', {layout: "layouts/layout2"})
 })
-
 
 // REGISTER a new user
 router.post("/register", async (req, res) => {

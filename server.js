@@ -63,13 +63,13 @@ app.use(function(req, res, next) {
 
 app.use("/", indexRouter);
 app.use("/authors", ensureAuthenticated, authorRouter);
-app.use("/books", ensureAuthenticated, bookRouter);
+// app.use("/books", ensureAuthenticated, bookRouter);
 app.use("/auth", authRouter);
 // app.use("/fileUpload", fileUploadRouter);
 
 // app.use("/", indexRouter);
 // app.use("/authors", authorRouter);
-// app.use("/books", bookRouter);
+app.use("/books", bookRouter);
 // app.use("/auth", authRouter);
 
 const PORT = process.env.PORT || 3000;
