@@ -1,13 +1,9 @@
+import csv
 import pandas as pd
 from Cryptodome.Cipher import AES
 from Cryptodome.Hash import MD5
 from Cryptodome.Random import random
-import numpy as np
-import time
-import hashlib
-from PyPDF2 import PdfFileWriter, PdfFileReader
 import sys
-import json
 import ast
 
 def build_trapdoor(MK, keyword):
@@ -15,6 +11,8 @@ def build_trapdoor(MK, keyword):
     keyword_index.update(str(keyword).encode('utf-8'))
     MK = MK.encode('utf-8')
     MK_length = len(MK)
+    if MK_length >16:
+        MK = MK[:16]
     if MK_length < 16:
         MK += bytes(16 - MK_length)
     ECB_cipher = AES.new(MK, AES.MODE_ECB)
@@ -53,13 +51,15 @@ def searchable_encryption(index_table, master_key):
     cntr=0
     for keyArr, valArr in index_table.items():
         # record = raw_data[row]
+        # print(cntr, keyArr)
         enckey = build_index(master_key, cntr, keyArr)
         encval = build_index(master_key, cntr, valArr)
         document_index[tuple(enckey)]  = encval
         
         cntr+=1
+    return document_index
     # print("hello")
-    print(document_index)
+    # print(document_index)
 
     # encr_index_table = {}
     # i=0
@@ -69,12 +69,45 @@ def searchable_encryption(index_table, master_key):
 
 if __name__ == "__main__":
     index_str = sys.argv[1]
-    key = sys.argv[2]
-    # print(index_str)
-    # print(key)
-    index_str = index_str[1:-4]
-    index_str+="}"
-    json_acceptable_string = index_str.replace("'", "\"")
-    index_table = ast.literal_eval(json_acceptable_string)
-    searchable_encryption(index_table, key)
-    # print("Hello")
+    master_key = sys.argv[2]
+    # print("password is ", key)
+    # print("INDEX STR IS ", index_str)
+    # index_str = index_str[1:-4]
+    # index_str+="}"
+    # print("INDEX STR IS ", index_str)
+    # json_acceptable_string = index_str.replace("'", "\"")
+    # index_table = ast.literal_eval(json_acceptable_string)
+    df = pd.read_csv("hello.csv")
+    inverted_index = df.to_dict(orient='list')
+    index_new = {}
+    for key, val in inverted_index.items(): 
+        # print(key, val)
+        if(key=="document"): index_new[key] = val
+        else:
+            tuple_str = ast.literal_eval(key)
+            index_new[tuple_str] = val
+            inverted_index = index_new
+    print("THE INVERTED INDEX IS ", inverted_index, type(inverted_index))
+    document_index = searchable_encryption(inverted_index, master_key)
+
+    # with open('index.csv', 'w',  encoding="utf-8", newline='') as csvfile:
+    #     writer = csv.DictWriter(csvfile)
+    #     # writer.writeheader()
+    #     for key,value in document_index.items():
+    #         s = str(value)
+    #         keystr = str(key)
+    #         # print(csvstr)
+    #         # writer.writerow(csvstr)
+    #         writer.writerow([keystr, s[1:-1]])
+    #     # csvfile.write(csvstr.split("\n"))
+
+    # writing to csv file
+    with open("index.csv", "w") as outfile:
+        writerfile = csv.writer(outfile)
+        # dict_rows = [[key, value] for key, value in document_index.items()]
+        writerfile.writerow(document_index.keys())        
+        writerfile.writerows(zip(*document_index.values()))
+    print(document_index)
+
+    # for key, values in document_index.items():
+    #     valuestr = ','.join(values)

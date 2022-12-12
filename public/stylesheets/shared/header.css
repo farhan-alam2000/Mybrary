@@ -39,3 +39,15 @@
 .header-nav li a:hover, .header-title:hover {
   color: white;
 }
+
+#myFiles{
+  /* color: red; */
+  font-size: larger;
+  font-weight: 400;
+}
+
+#addFile{
+  font-size: larger;
+  font-weight: 400;
+  /* color: red; */
+}

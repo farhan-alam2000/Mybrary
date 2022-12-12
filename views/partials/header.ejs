@@ -4,14 +4,14 @@
     <ul>
       <!-- <li><a href="/authors">Authors</a></li>
       <li><a href="/authors/new">Add Author</a></li> -->
-      <li><a href="/books">My Files</a></li>
-      <li><a href="/books/new">Add File</a></li>
+      <li ><a href="/books" id="myFiles">My Files</a></li>
+      <li ><a href="/books/new" id="addFile">Add File</a></li>
       <li>
         <!-- <form action="/logout?_method=DELETE" method="post">
           <button type="submit" class="btn btn-warning btn-sm">Logout</button>
         </form> -->
         <form action="/auth/logout" method="get">
-          <button type="submit" class="btn btn-warning btn-sm">Logout</button>
+          <button type="submit" class="btn btn-warning btn-sm" id="logout-btn">Logout</button>
         </form>
       </li>
     </ul>

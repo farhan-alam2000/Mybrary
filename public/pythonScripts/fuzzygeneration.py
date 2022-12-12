@@ -19,4 +19,4 @@ def addFuzzy(keyword, d):
           fuzzy_keywords.add(new_keyword)
  
   # Return the generated fuzzy keyword set
-  return fuzzy_keywords
+  return sorted(fuzzy_keywords)

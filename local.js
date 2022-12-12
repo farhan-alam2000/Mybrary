@@ -1,14 +1,28 @@
 // const express = require("express");
 // const app = express();
+// const session = require("express-session");
+// app.use(
+//   session({
+//     secret: "keyboard cat",
+//     resave: false,
+//     saveUninitialized: true,
+//     cookie: { secure: true },
+//   })
+// );
+// app.use(express.static("public"));
 
-// app.get("/", (req, res)=>{
-//     // app.locals.user = req.body.user;
-//     res.send("Index")
-// })
+// app.get("/show/:id", (request, response, next) => {
+// //   request.session.id = request.params.id;
+//   response.send("ID stored")
+// });
 
-// app.get("/user", (req, res)=>{
-//     // console.log(app.locals.user)
-//     // res.send(app.locals.user)
-// })
+// //Retrieve the id from the session object.
+// app.get("/showMyId", (request, response, next) => {
+//     // console.log(request.session.id)
+//   response.send(request.session.id);
+// });
 
-// app.listen(3000)
+// const PORT = 3000
+
+// app.listen(PORT, console.log(`Server running on  ${PORT}`));
+

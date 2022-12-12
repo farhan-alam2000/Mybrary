@@ -73,42 +73,33 @@ router.get("/login", forwardAuthenticated, async (req, res) => {
     res.render('auth/login', {layout: "layouts/layout2"})
 })
 
-// console.log(app.locals.port)
-
 // LOGIN
-router.post('/login', (req, res, next) => {
-    // console.log(req.body.email);
+router.post('/login',passport.authenticate('local', { failureRedirect: '/auth/login', failureFlash: true }), (req, res, next) => {
+    // console.log(global.email)
     global.email = req.body.email
-    console.log(global.email)
-    passport.authenticate('local', {
-      successRedirect: '/',
-      failureRedirect: '/auth/login',
-      failureFlash: true
-    })(req, res, next);
+    res.redirect('/')
+    // res.redirect('/index/' + req.body.email)
+    // passport.authenticate('local', {
+    //   successRedirect: '/',
+    //   failureRedirect: '/auth/login',
+    //   failureFlash: true
+    // })(req, res, next);
 });
 
-// router.post("/login", (req, res) => {
-//     try {
-//         // const user = await User.findOne({username: req.body.username});
-//         // if(!user) {
-//         //     res.status(400).json("Wrong credentials, try again");
-//         // }
-
-//         // const validated = await bcrypt.compare(req.body.password, user.password);
-//         // if(!validated) { // passwords don't match
-//         //     res.status(400).json("Wrong credentials, try again");
-//         // }
-        
-//         // // take everything in variable others except password.
-//         // const { password, ...others } = user._doc;
-//         // res.status(200).json(others);
-//         // res.status(200).redirect('index'); // only after authentication successful
-//         res.redirect('/');
-//     } catch (err) {
-//         // res.status(500).json(err);
-//         res.redirect('/');
-//     }
+// router.post('/login',passport.authenticate('local', { failureRedirect: '/auth/login', failureFlash: true }), async (req, res, next) => {
+//     const email = req.body.email
+//   // console.log(query.Email)
+// //   console.log(req.params.id)
+//   let books
+//   try {
+//     books = await Book.find({email}).sort({ createdAt: 'desc' }).limit(10).exec()
+//   } catch {
+//     books = []
+//   }
+//   res.render('index', { books: books, email: email })
 // });
+
+
 
 //logout
 router.get('/logout', (req, res) => {

@@ -1,33 +1,62 @@
-import pandas as pd
-import numpy as np
-import time
-import string
-from nltk.corpus import stopwords
 import csv
+import os
 import sys
-import PyPDF2
-# from fuzzywuzzy import fuzz
-# from fuzzywuzzy import process
-import math
 from fuzzygeneration import addFuzzy
+import pandas as pd
+from ast import literal_eval
 
-n_doc=4
+n_doc=10
+cleaned_doc = sys.argv[1]
+cleaned_doc = cleaned_doc[1:-1]
+id = sys.argv[2]
+doc_no = sys.argv[3]
+# doc_no = doc_no[1:-3]
+doc_no = int(doc_no)
+# cleaned_doc = "hello the world of cats and dogs"
+# key = "1234567890"
+# doc_no=1
+# print("DOCUMENT NUMBER IN INDEXING IS ", doc_no)
+
+# path = "hello.csv"
+# isExist = os.path.exists(path)
 inverted_index = {}
-# document ="India, officially the Republic of India, is a country in South Asia. It is the seventh largest country by area, the second most populous country, and the most populous democracy in the world. Bounded by the Indian Ocean on the south, the Arabian Sea on the southwest, and the Bay of Bengal on the southeast, it shares land borders with Pakistan to the west; China, Nepal, and Bhutan to the north; and Bangladesh and Myanmar to the east. In the Indian Ocean, India is in the vicinity of Sri Lanka and the Maldives; its Andaman and Nicobar Islands share a maritime border with Thailand, Myanmar, and Indonesia. The nation's capital city is New Delhi."
+if(doc_no>0):
+    df = pd.read_csv("hello.csv")
+    inverted_index = df.to_dict(orient='list')
+    index_new = {}
+    for key, val in inverted_index.items(): 
+        # print(key, val)
+        if(key=="document"): index_new[key] = val
+        else:
+            tuple_str = literal_eval(key)
+            index_new[tuple_str] = val
+            inverted_index = index_new
+    # print("THE DICTIONARY I GET IS ", inverted_index)
 
-# document = sys.argv[1]
-# def text_extract(doc_name):
-#     pdfFileObj = open(doc_name, 'rb')
-#     pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
-#     doc_text = (pdfReader.getPage(0).extractText())
-#     pdfFileObj.close()
-    
 def createIndex(fuzzySet, doc_no, doc_id):
+    # print(inverted_index)
     inverted_index["document"] = inverted_index.get("document", [""]*n_doc)
     inverted_index["document"][doc_no] = doc_id
     key = tuple(fuzzySet)
+    # for keyy, val in inverted_index.items():
+    #     print(keyy, type(keyy))
+    #     print(key, type(key))
+        # keyy=keyy[1:-1]
+        # s = keyy.split(", ")
+        # res = tuple(keyy)
+        # print(keyy, type(res))
+        # if(keyy==key): print("YES")
+        # else: print("NO")
+    # print("NEXT")
     inverted_index[key]= inverted_index.get(key, [0]*n_doc)
     inverted_index[key][doc_no] +=1
+    
+    # if(key in inverted_index.items()):
+    #     inverted_index[key][doc_no] +=1
+    # else:
+    #     inverted_index[key] = [0]*n_doc
+    #     inverted_index[key][doc_no] +=1
+    # return inverted_index
 
 # def addFuzzy(keyword):
 #     # Set the maximum edit distance
@@ -81,26 +110,23 @@ def createIndex(fuzzySet, doc_no, doc_id):
 # addFuzzy2("cat", 1)
 
 def handleFuzzy(doc, doc_no, doc_id):
+    # print("DOC IS ", doc)
     for term in doc.split():
         fuzzySet = addFuzzy(term, 1)
+        # print("FUZZY SET IS ", fuzzySet)
         createIndex(fuzzySet, doc_no, doc_id)
 
-# doc_name = "D:/work/BTP/CODE/India.pdf"
-# print(doc_name)
-# print(open(doc_name).read())
-# doc_text = text_extract(doc_name)
 
-# CODE
-cleaned_doc = sys.argv[1]
-key = sys.argv[2]
-# doc_text = "India, is a country."
-#  Bounded by t officially the Republic of India,he Indian Ocean on the south, the Arabian Sea on the southwest, and the Bay of Bengal on the southeast, it shares land borders with Pakistan to the west; China, Nepal, and Bhutan to the north; and Bangladesh and Myanmar to the east. In the Indian Ocean, India is in the vicinity of Sri Lanka and the Maldives; its Andaman and Nicobar Islands share a maritime border with Thailand, Myanmar, and Indonesia. The nation's capital city is New Delhi."
-
+# print(doc_no)
 # print("\nThe cleaned text is: \n", cleaned_doc)
-handleFuzzy(cleaned_doc, 0, key)
-print(str(inverted_index))
-# FINAL RESULT OF THIS CODE IS INVERTED INDEX TABLE, IN THE FORM OF A DICTIONARY
+handleFuzzy(cleaned_doc, doc_no, id)
 
+with open("hello.csv", "w") as outfile:
+    writerfile = csv.writer(outfile)
+    writerfile.writerow(inverted_index.keys())        
+    writerfile.writerows(zip(*inverted_index.values()))
+
+print(str(inverted_index))
 
 # indexTable = createIndex(fuzzySet, 0)
 # print("\nThe inverted index table: \n", indexTable)

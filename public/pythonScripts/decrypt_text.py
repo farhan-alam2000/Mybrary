@@ -17,8 +17,8 @@ from Cryptodome.Random import random
 from Cryptodome.Random import get_random_bytes
 import pyaes, pbkdf2, binascii, os, secrets
 
-def encrypt_doc(text, MK):
-    # MK="hello"
+def decryptDoc(encrypted_text, MK):
+    # iv = secrets.randbits(256)
     MK = MK.encode('utf-8')
     MK_length = len(MK)
     if MK_length>16:
@@ -26,14 +26,13 @@ def encrypt_doc(text, MK):
     if MK_length < 16:
         MK += bytes(16 - MK_length)
     iv = 112915530833849023049749033005636095837785094513880771218920184288349877773586
-    # iv = secrets.randbits(256)
-    # plaintext = "Secret Data"
     aes = pyaes.AESModeOfOperationCTR(MK, pyaes.Counter(iv))
-    ciphertext = aes.encrypt(text)
-    return ciphertext.hex()
-    # print('Encrypted Text:', binascii.hexlify(ciphertext))
+    decrypted = aes.decrypt(encrypted_text)
+    # print('Decrypted Text:', decrypted.decode())
+    return decrypted.decode()
 
 cleaned_doc = sys.argv[1]
 password = sys.argv[2]
-encrypted_stuff = encrypt_doc(cleaned_doc, password)
-print(encrypted_stuff)
+input_byte = bytes.fromhex(cleaned_doc)
+decrypted_stuff = decryptDoc(input_byte, password)
+print(decrypted_stuff)
